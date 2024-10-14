@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import "./FirstAid.css";
 
-const FirstAid = ({ changeRoute }) => {
-  const [query, setQuery] = useState("");
-  const [advice, setAdvice] = useState("");
-  const [loading, setLoading] = useState(false);
+const FirstAid = () => {
+  const [query, setQuery] = useState("");  // User input (e.g., "snake bite")
+  const [advice, setAdvice] = useState("");  // ChatGPT response
+  const [loading, setLoading] = useState(false);  // Loading state
 
-  // Function to handle the API request to ChatGPT
-  const getFirstAidAdvice = async ({changeRoute}) => {
+  const navigate = useNavigate();  
+
+  const API_KEY = 'YOUR_API_KEY';  
+
+  // Function to handle the API request
+  const getFirstAidAdvice = async () => {
     if (!query) {
       setAdvice("Please enter a medical issue to get advice.");
       return;
     }
 
-    setLoading(true);  // Start loading
+    setLoading(true);  // Start loading spinner
+
     try {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',
@@ -25,7 +31,7 @@ const FirstAid = ({ changeRoute }) => {
         },
         {
           headers: {
-            'Authorization': `Bearer YOUR_API_KEY`,  // Replace with your actual API key
+            'Authorization': `Bearer ${API_KEY}`,  // Directly using API key here
             'Content-Type': 'application/json',
           }
         }
@@ -34,9 +40,10 @@ const FirstAid = ({ changeRoute }) => {
       // Set the response from the API as advice
       setAdvice(response.data.choices[0].message.content);
     } catch (error) {
+      console.error("Error fetching advice:", error);
       setAdvice("Sorry, there was an error fetching the advice. Please try again.");
     } finally {
-      setLoading(false);  // Stop loading
+      setLoading(false);  // Stop loading spinner
     }
   };
 
@@ -62,7 +69,7 @@ const FirstAid = ({ changeRoute }) => {
         </div>
       )}
 
-      <button onClick={() => changeRoute("")}>Back to Home</button>
+      <button onClick={() => navigate("/")}>Back to Home</button>
     </div>
   );
 };
